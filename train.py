@@ -3,8 +3,8 @@ import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
 
+import random
 import numpy as np
 from tqdm import tqdm
 import wandb
@@ -21,6 +21,7 @@ def define_argparser():
     p.add_argument('--batch_size', type=int, default=64)
     p.add_argument('--n_epochs', type=int, default=50)
     p.add_argument('--train_valid_ratio', type=float, default=0.8)
+    p.add_argument('--random_seed', type=int, default=42)
 
     p.add_argument('--wandb_project', type=str, required=True)
 
@@ -34,14 +35,23 @@ def main(config):
     wandb.config = {
         'epochs': config.n_epochs,
         'batch_size': config.batch_size,
+        'random_seed': config.random_seed,
     }
+
+    # set random seed
+    torch.manual_seed(config.random_seed)      # About PyTorch
+    torch.backends.cudnn.deterministic = True  # About CuDNN -> Maybe cause slow training ?
+    torch.backends.cudnn.benchmark = False     # About CuDNN
+    np.random.seed(config.random_seed)         # About Numpy
+    random.seed(config.random_seed)            # About transform -> Also should be in augmentation.py ?
+    torch.cuda.manualseed(config.random_seed)  # About GPU
 
     best_test_loss = 9999.
 
     device = torch.device(0)
 
     model = GenderClassifier().to(device)
-    loss_fn = torch.nn.BCELoss()
+    loss_fn = nn.BCELoss()
     optimizer = optim.Adam(model.parameters())
     train_loader, valid_loader = get_gender_loaders(config)
 

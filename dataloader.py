@@ -2,12 +2,24 @@ import torch
 from torch.utils.data import DataLoader
 
 import pandas as pd
+import numpy as np
+import random
 
 # Need to edit when dataset changed
 from dataset import GenderDataset
 from augmentation import basic_transforms
 
+
 def get_gender_loaders(config):
+
+    # set random seed
+    # https://pytorch.org/docs/stable/notes/randomness.html#dataloader
+    np.random.seed(config.random_seed)
+    random.seed(config.random_seed)
+    g = torch.Generator()
+    g.manual_seed(config.random_seed)
+
+
     dataframe: pd.DataFrame = pd.read_csv('../input/data/pre_processed_train.csv')
 
     train_cnt: int = int(dataframe.shape[0] * config.train_valid_ratio)
@@ -28,6 +40,7 @@ def get_gender_loaders(config):
         shuffle=True,
         num_workers=2,
         drop_last=True,
+        generator=g,
     )
 
     valid_loader = DataLoader(
@@ -37,6 +50,7 @@ def get_gender_loaders(config):
         shuffle=False,
         num_workers=2,
         drop_last=True,
+        generator=g,
     )
 
     return train_loader, valid_loader
