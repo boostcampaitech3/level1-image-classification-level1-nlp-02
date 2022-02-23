@@ -3,6 +3,7 @@ import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import random
 
 import numpy as np
 from tqdm import tqdm
@@ -21,9 +22,18 @@ class Trainer():
     def train(self, config, train_loader, valid_loader):
         wandb.init(project=config.wandb_project, entity='sujeongim')
         wandb.config = {
+            'dropout':0.5,
             'epochs': config.n_epochs,
             'batch_size': config.batch_size,
         }
+        
+        # set random seed
+        torch.manual_seed(config.random_seed)       # About PyTorch
+        torch.backends.cudnn.deterministic = True   # About CuDNN -> Maybe cause slow training ?
+        torch.backends.cudnn.benchmark = False      # About CuDNN
+        np.random.seed(config.random_seed)          # About Numpy
+        random.seed(config.random_seed)             # About transform -> Also should be in augmentation.py ?
+        torch.cuda.manual_seed(config.random_seed)  # About GPU
 
         lowest_loss = np.inf
         best_model = None
@@ -69,9 +79,9 @@ class Trainer():
 
                     y, y_pred = y.cpu().detach().numpy(), y_pred.cpu().detach().numpy()
 
-                    precision = precision_score(y, y_pred, average='macro')
-                    recall = recall_score(y, y_pred, average='macro')
-                    f1 = f1_score(y, y_pred, average='macro') # 데이터 불균형 따로 고려하지 않음
+                    precision = precision_score(y, y_pred, average='macro', zero_division=1)
+                    recall = recall_score(y, y_pred, average='macro', zero_division=1)
+                    f1 = f1_score(y, y_pred, average='macro', zero_division=1) # 데이터 불균형 따로 고려하지 않음
 
                     valid_loss += loss_out
                     valid_precision += precision
@@ -104,7 +114,7 @@ class Trainer():
                 'recall': valid_recall,
                 'f1_score': valid_f1_score})
 
-        return model
+        return self.model
 
 
 

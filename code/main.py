@@ -3,7 +3,11 @@ import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import pandas as pd
+import numpy as np
+import random
 
+from PIL import Image
 from dataloader import get_loader
 import augmentation
 from trainer import Trainer
@@ -23,6 +27,7 @@ def define_argparser():
     p.add_argument('--batch_size', type=int, default=64)
     p.add_argument('--n_epochs', type=int, default=20)
     p.add_argument('--verbose', type=int, default=2)
+    p.add_argument('--random_seed', type=int, default=42)
 
     p.add_argument('--model', type=str, default='cnn_basic')
 
@@ -37,25 +42,28 @@ def get_model(config):
         raise NotImplementedError('You need to specify model name.')
     return model
 
+def wrapper(trained_model, device):
 
-def prediction(image_id : str):
+    def prediction(image_id : str):
+        test_image_path = '../input/data/eval/images/'
+        image = Image.open(test_image_path + image_id)
+        preprocessed_image = augmentation.basic_transforms(image)
+        input_image = preprocessed_image.unsqueeze(0).to(device)
+        
+        with torch.no_grad():
+            model_pred = trained_model(input_image)
+            _, y_pred = torch.max(model_pred.data, 1)
 
-    image = Image.open(test_image_path + image_id)
-    preprocessed_image = augmentation.basic_transforms(image)
-    input_image = preprocessed_image.unsqueeze(0)
-    
-    with torch.no_grad():
-        model_pred = trained_model(input_image)
-        _, y_pred = torch.max(model_pred.data, 1)
+        return int(y_pred.cpu().detach())
 
-    return y_pred
+    return prediction
 
 
 def main(config):
     # Set device based on user defined configuration.
     device = torch.device('cpu') if config.gpu_id < 0 else torch.device('cuda:%d' % config.gpu_id)
     config.device = device
-    
+
     train_loader, valid_loader = get_loader(config)
 
     print("Train:", len(train_loader.dataset))
@@ -70,11 +78,10 @@ def main(config):
 
     #prediction
     test_dataset = pd.read_csv('../input/data/eval/info.csv')
-    test_image_path = '../input/data/eval/images/'
-    test_dataset['ans'] = test_dataset['ImageID'].apply(prediction)
+    test_dataset['ans'] = test_dataset['ImageID'].apply(wrapper(trained_model, device))
 
-    test_datset.to_csv('../output/ans.csv')
-    
+    test_dataset.to_csv('../output/ans.csv')
+
 
 
 if __name__ == '__main__':

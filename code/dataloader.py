@@ -1,5 +1,7 @@
 import torch
 import pandas as pd
+import numpy as np
+import random
 
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
@@ -30,6 +32,13 @@ class MaskDataset(Dataset):
 
 
 def get_loader(config):
+
+    # set random seed
+    np.random.seed(config.random_seed)
+    random.seed(config.random_seed)
+    g = torch.Generator()
+    g.manual_seed(config.random_seed)
+
     dataset : pd.DataFrame = pd.read_csv(CSV_PATH)
     
     train_cnt : int = int(len(dataset) * config.train_ratio)

@@ -29,7 +29,7 @@ class CNN_Basic(nn.Module):
 
             self.layers.append(nn.ReLU(True))
             self.layers.append(nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)))
-            #self.layers.append(nn.Dropout2d(p=0.5))
+            self.layers.append(nn.Dropout2d(p=0.5))
             prev_cdim = cdim
 
         # Dense layers
