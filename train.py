@@ -12,8 +12,8 @@ import numpy as np
 from tqdm import tqdm
 import wandb
 
-from model import GenderClassifier, MaskClassifier
-from dataloader import get_gender_loaders, get_mask_loaders
+from model import GenderClassifier, MaskClassifier, AgeClassifier
+from dataloader import get_gender_loaders, get_mask_loaders, get_age_loaders
 from utils import get_metrics
 
 
@@ -39,12 +39,12 @@ def main(config):
     # hide user warnings in CLI
     warnings.filterwarnings(action='ignore')
 
-    # wandb.init(project=config.wandb_project, entity=config.wandb_entity)
-    # wandb.config = {
-    #     'epochs': config.n_epochs,
-    #     'batch_size': config.batch_size,
-    #     'random_seed': config.random_seed,
-    # }
+    wandb.init(project=config.wandb_project, entity=config.wandb_entity)
+    wandb.config = {
+        'epochs': config.n_epochs,
+        'batch_size': config.batch_size,
+        'random_seed': config.random_seed,
+    }
 
     # set random seed
     torch.manual_seed(config.random_seed)       # About PyTorch
@@ -59,12 +59,14 @@ def main(config):
     device = torch.device(0)
 
     # model = GenderClassifier().to(device)
-    model = MaskClassifier().to(device)
+    # model = MaskClassifier().to(device)
+    model = AgeClassifier().to(device)
     # loss_fn = nn.BCELoss()
     loss_fn = nn.CrossEntropyLoss() # CrossEntropyLoss 의 label 은 long 타입이어야 함 ([0.2, 0.5, 0.9], [2])
     optimizer = optim.Adam(model.parameters())
     # train_loader, valid_loader = get_gender_loaders(config)
-    train_loader, valid_loader = get_mask_loaders(config)
+    # train_loader, valid_loader = get_mask_loaders(config)
+    train_loader, valid_loader = get_age_loaders(config)
 
 
     # start
@@ -162,37 +164,38 @@ def main(config):
 
         print(f'Epoch-{epoch_index+1} Train Loss: {train_loss:.5f}  Valid Loss: {valid_loss:.5f}  Best Valid Loss: {best_test_loss:.5f}  Precision: {valid_precision:.5f}  Recall: {valid_recall:.5f}  f1_score: {valid_f1_score:.5f}')
         
-        # wandb.log({
-        #     'train_loss': train_loss,
-        #     'valid_loss': valid_loss,
-        #     'precision': valid_precision,
-        #     'recall': valid_recall,
-        #     'f1_score': valid_f1_score})
+        wandb.log({
+            'train_loss': train_loss,
+            'valid_loss': valid_loss,
+            'precision': valid_precision,
+            'recall': valid_recall,
+            'f1_score': valid_f1_score})
     
 
     if config.classes > 2:
         print(classification_report(
             y_all,
             y_hat_all,
-            target_names=['none', 'incorrect', 'correct']))
+            # target_names=['none', 'incorrect', 'correct']))
+            target_names=['< 30', '30 <= < 60', '60 <=']))
 
 
     # wandb artifacts
-    # torch.save({
-    #     'model_state_dict': best_loss_model,
-    #     'epoch': best_loss_epoch,
-    #     'optimizer_state_dict': best_loss_optimizer,
-    #     'loss': best_test_loss,
-    #     'precision': best_loss_precision,
-    #     'recall': best_loss_recall,
-    #     'f1_score': best_loss_f1_score},
-    #     f'checkpoint/{config.model_fn}_epoch{best_loss_epoch}_{best_test_loss:.5f}.pt')
+    torch.save({
+        'model_state_dict': best_loss_model,
+        'epoch': best_loss_epoch,
+        'optimizer_state_dict': best_loss_optimizer,
+        'loss': best_test_loss,
+        'precision': best_loss_precision,
+        'recall': best_loss_recall,
+        'f1_score': best_loss_f1_score},
+        f'checkpoint/{config.model_fn}_epoch{best_loss_epoch}_{best_test_loss:.5f}.pt')
     
-    # run = wandb.init(project=config.wandb_project)
-    # artifact = wandb.Artifact(config.model_fn, type='model')
-    # artifact.add_file(f'checkpoint/{config.model_fn}_epoch{best_loss_epoch}_{best_test_loss:.5f}.pt')
-    # run.log_artifact(artifact)
-    # run.finish()
+    run = wandb.init(project=config.wandb_project)
+    artifact = wandb.Artifact(config.model_fn, type='model')
+    artifact.add_file(f'checkpoint/{config.model_fn}_epoch{best_loss_epoch}_{best_test_loss:.5f}.pt')
+    run.log_artifact(artifact)
+    run.finish()
 
 
 if __name__ == '__main__':
