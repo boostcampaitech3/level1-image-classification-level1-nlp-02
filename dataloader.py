@@ -6,7 +6,7 @@ import numpy as np
 import random
 
 # Need to edit when dataset changed
-from dataset import GenderDataset, MaskDataset, AgeDataset
+from dataset import GenderDataset, MaskDataset, AgeDataset, EvalDataset
 from augmentation import basic_transforms
 
 
@@ -20,35 +20,36 @@ def get_gender_loaders(config):
     g.manual_seed(config.random_seed)
 
 
-    dataframe: pd.DataFrame = pd.read_csv('../input/data/pre_processed_train.csv')
+    train_dataframe: pd.DataFrame = pd.read_csv('../input/data/shuffled_stratified_train.csv')
+    valid_dataframe: pd.DataFrame = pd.read_csv('../input/data/shuffled_stratified_valid.csv')
 
-    train_cnt: int = int(dataframe.shape[0] * config.train_valid_ratio)
-    valid_cnt: int = dataframe.shape[0] - train_cnt
+    # train_cnt: int = int(dataframe.shape[0] * config.train_valid_ratio)
+    # valid_cnt: int = dataframe.shape[0] - train_cnt
 
     # Shuffle dataset to split into train/valid set.
-    indices: torch.tensor = torch.randperm(dataframe.shape[0])
-    train_idx, valid_idx = torch.index_select(
-        torch.tensor([i for i in range(dataframe.shape[0])]),
-        dim=0,
-        index=indices
-    ).split([train_cnt, valid_cnt], dim=0)
+    # indices: torch.tensor = torch.randperm(dataframe.shape[0])
+    # train_idx, valid_idx = torch.index_select(
+    #     torch.tensor([i for i in range(dataframe.shape[0])]),
+    #     dim=0,
+    #     index=indices
+    # ).split([train_cnt, valid_cnt], dim=0)
 
     train_loader= DataLoader(
         # Need to edit when dataset changed
-        dataset=GenderDataset(dataframe, train_idx, basic_transforms),
+        dataset=GenderDataset(train_dataframe, basic_transforms),
         batch_size=config.batch_size,
         shuffle=True,
-        num_workers=2,
+        num_workers=8,
         drop_last=True,
         generator=g,
     )
 
     valid_loader = DataLoader(
         # Need to edit when dataset changed
-        dataset=GenderDataset(dataframe, valid_idx, basic_transforms),
+        dataset=GenderDataset(valid_dataframe, basic_transforms),
         batch_size=config.batch_size,
         shuffle=False,
-        num_workers=2,
+        num_workers=8,
         drop_last=True,
         generator=g,
     )
@@ -146,3 +147,17 @@ def get_age_loaders(config):
     )
 
     return train_loader, valid_loader
+
+
+def get_eval_loader(batch_size):
+
+    dataframe: pd.DataFrame = pd.read_csv('../input/data/eval/info.csv')
+
+    eval_loader = DataLoader(
+        dataset=EvalDataset(dataframe, basic_transforms),
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=8,
+    )
+
+    return eval_loader

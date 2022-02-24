@@ -58,15 +58,15 @@ def main(config):
 
     device = torch.device(0)
 
-    # model = GenderClassifier().to(device)
+    model = GenderClassifier().to(device)
     # model = MaskClassifier().to(device)
-    model = AgeClassifier().to(device)
-    # loss_fn = nn.BCELoss()
-    loss_fn = nn.CrossEntropyLoss() # CrossEntropyLoss 의 label 은 long 타입이어야 함 ([0.2, 0.5, 0.9], [2])
+    # model = AgeClassifier().to(device)
+    loss_fn = nn.BCELoss()
+    # loss_fn = nn.CrossEntropyLoss() # CrossEntropyLoss 의 label 은 long 타입이어야 함 ([0.2, 0.5, 0.9], [2])
     optimizer = optim.Adam(model.parameters())
-    # train_loader, valid_loader = get_gender_loaders(config)
+    train_loader, valid_loader = get_gender_loaders(config)
     # train_loader, valid_loader = get_mask_loaders(config)
-    train_loader, valid_loader = get_age_loaders(config)
+    # train_loader, valid_loader = get_age_loaders(config)
 
 
     # start
@@ -192,7 +192,7 @@ def main(config):
         f'checkpoint/{config.model_fn}_epoch{best_loss_epoch}_{best_test_loss:.5f}.pt')
     
     run = wandb.init(project=config.wandb_project)
-    artifact = wandb.Artifact(config.model_fn, type='model')
+    artifact = wandb.Artifact(f'{config.model_fn}_epoch{best_loss_epoch}_{best_test_loss:.5f}', type='model')
     artifact.add_file(f'checkpoint/{config.model_fn}_epoch{best_loss_epoch}_{best_test_loss:.5f}.pt')
     run.log_artifact(artifact)
     run.finish()
