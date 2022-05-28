@@ -83,13 +83,10 @@ python inference.py
 
 ### 프로젝트 구조 및 사용 데이터셋의 구조도
 
-![모델구조](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/820a85cf-7ea0-49db-9dd8-a60919ccf573/Untitled.png)
+![모델구조](https://user-images.githubusercontent.com/26568363/170833117-009b0924-fe0a-4a4c-b379-71a3775e8497.jpg)
 
-모델구조
+![데이터셋 구조도](https://user-images.githubusercontent.com/26568363/170833130-2f9bbf48-bd26-4d60-b87b-80289bd4c269.jpg)
 
-![데이터셋 구조도](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/d602004b-aa1e-4fa9-beb3-8f967c6f7a5e/Untitled.png)
-
-데이터셋 구조도
 
 - train/images 폴더 내에 인물 별 폴더가 존재하는 구조로 이루어져있다.
 - 인물 폴더 내에는 마스크를 안쓰고 있는 이미지 1장, 마스크를 쓰고 있는 이미지 5장, 마스크를 부정확하게 쓰고 있는 이미지 1장으로 구성되어있다.
@@ -141,7 +138,7 @@ python inference.py
 
 - EfficientNet-B0 : width, depth, resolution를 조합하는 Compound Scaling을 사용하여 다른 비슷한 성능의 모델보다 적은 파라미터의 수를 가지는 모델이다.
 - 입력받은 이미지를 Mask * Gender * Age = 3 * 2 * 3 = 18개의 클래스로 구분한다.
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/18d44712-c2b6-4ec5-80c7-af342ef8f6b7/Untitled.png)
+![eda](https://user-images.githubusercontent.com/26568363/170833150-948d7d49-1a62-4c72-a163-20deba632913.jpg)
 
 <br>
 
@@ -163,7 +160,7 @@ python inference.py
 - Epoch: `15`
 - Batch-size: `64`
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/e990ef05-0101-4827-a591-e5c6e68b92ba/Untitled.png)
+![eff](https://user-images.githubusercontent.com/26568363/170833155-9da0bdf5-413e-4de9-8fe0-23bc55a2470d.jpg)
 
 - Gray Scale을 적용하기 이전과 이후를 비교한 학습그래프이다.(녹색이 적용 후)
 
