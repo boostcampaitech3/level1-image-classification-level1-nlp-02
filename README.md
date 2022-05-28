@@ -120,7 +120,7 @@ python inference.py
 
 평가 데이터 (총 데이터의 40%) : 6,300 (public) / 6,300 (private)
 
-![EDA.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/b270b3bc-d823-4889-b775-24c0a301d09d/EDA.png)
+![eda](https://user-images.githubusercontent.com/26568363/170833150-948d7d49-1a62-4c72-a163-20deba632913.jpg)
 
 - 성별 기준으로 보았을 때, 여성 데이터는 남성 데이터에 비해 619(59.1%)개 만큼 많았다.
 - 나이 기준으로 보았을 때, 60세 이상 카테고리 데이터의 수가 30세 미만 카테고리 데이터의 수에 비해 1,089장(85.0%)개 만큼 부족한 데이터 불균형 상태임을 알 수 있다.
@@ -138,7 +138,9 @@ python inference.py
 
 - EfficientNet-B0 : width, depth, resolution를 조합하는 Compound Scaling을 사용하여 다른 비슷한 성능의 모델보다 적은 파라미터의 수를 가지는 모델이다.
 - 입력받은 이미지를 Mask * Gender * Age = 3 * 2 * 3 = 18개의 클래스로 구분한다.
-![eda](https://user-images.githubusercontent.com/26568363/170833150-948d7d49-1a62-4c72-a163-20deba632913.jpg)
+
+
+![eff](https://user-images.githubusercontent.com/26568363/170833155-9da0bdf5-413e-4de9-8fe0-23bc55a2470d.jpg)
 
 <br>
 
@@ -159,10 +161,10 @@ python inference.py
 - Loss: `CrossEntropyLoss`
 - Epoch: `15`
 - Batch-size: `64`
+![log](https://user-images.githubusercontent.com/26568363/170833197-4ec07002-c3b4-4185-bbd8-aff8c0fc5620.jpg)
+(녹색이 적용 후)
 
-![eff](https://user-images.githubusercontent.com/26568363/170833155-9da0bdf5-413e-4de9-8fe0-23bc55a2470d.jpg)
-
-- Gray Scale을 적용하기 이전과 이후를 비교한 학습그래프이다.(녹색이 적용 후)
+- Gray Scale을 적용하기 이전과 이후를 비교한 학습그래프이다.
 
 <br>
 
